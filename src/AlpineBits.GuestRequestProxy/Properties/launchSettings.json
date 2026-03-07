@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "AlpineBits.GuestRequestProxy": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:56144;http://localhost:56145"
+    }
+  }
+}

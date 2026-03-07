@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    AlpineBits 2022-10
+    https://www.alpinebits.org/
+
+    Sample file for Activities success response
+             
+    Changelog:
+    v. 2020-10 1.0 initial example
+-->
+
+<OTA_HotelPostEventNotifRS
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.opentravel.org/OTA/2003/05"
+        xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelPostEventNotifRS.xsd"
+        Version="8.000">
+    
+    <Success/>
+    
+</OTA_HotelPostEventNotifRS>

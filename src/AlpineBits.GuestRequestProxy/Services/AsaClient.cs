@@ -1,27 +1,26 @@
 using System.Net.Http.Headers;
-using System.Text;
-using AlpineBits.GuestRequestProxy.Options;
-using Microsoft.Extensions.Options;
 
 namespace AlpineBits.GuestRequestProxy.Services;
 
-public sealed class AsaClient(HttpClient httpClient, IOptions<AlpineBitsOptions> options) : IAsaClient
+public sealed class AsaClient(HttpClient httpClient) : IAsaClient
 {
-    private readonly AlpineBitsOptions _options = options.Value;
-
-    public async Task<(int StatusCode, string ResponseBody, string? ContentType)> ForwardGuestRequestAsync(string payload, CancellationToken cancellationToken)
+    public async Task<(int StatusCode, string ResponseBody, string? ContentType)> SendAsync(
+        string targetUrl,
+        string action,
+        string requestXml,
+        string? username,
+        string? password,
+        CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, _options.TargetUrl)
-        {
-            Content = new StringContent(payload, Encoding.UTF8, "application/xml")
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, targetUrl);
+        using var content = new MultipartFormDataContent();
+        content.Add(new StringContent(action), "action");
+        content.Add(new StringContent(requestXml), "request");
+        request.Content = content;
 
-        request.Headers.TryAddWithoutValidation("X-AlpineBits-Version", _options.Version);
-        request.Headers.TryAddWithoutValidation("X-AlpineBits-Action", _options.Action);
-
-        if (!string.IsNullOrWhiteSpace(_options.Username) && !string.IsNullOrWhiteSpace(_options.Password))
+        if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
         {
-            var raw = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_options.Username}:{_options.Password}"));
+            var raw = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{username}:{password}"));
             request.Headers.Authorization = new AuthenticationHeaderValue("Basic", raw);
         }
 

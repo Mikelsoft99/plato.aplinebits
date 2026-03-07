@@ -1,0 +1,66 @@
+{
+  "versions": [
+    {
+      "version": "2024-10",
+      "actions": [
+        {
+          "action": "action_OTA_Ping"
+        },
+        {
+          "action": "action_OTA_HotelAvailNotif",
+          "supports": [
+            "OTA_HotelAvailNotif_accept_rooms",
+            "OTA_HotelAvailNotif_accept_categories",
+            "OTA_HotelAvailNotif_accept_deltas",
+            "OTA_HotelAvailNotif_accept_BookingThreshold"
+          ]
+        },
+        {
+          "action": "action_OTA_Read"
+        },
+        {
+          "action": "action_OTA_HotelResNotif_GuestRequests"
+        },
+        {
+          "action": "action_OTA_HotelDescriptiveContentNotif_Inventory",
+          "supports": [
+            "OTA_HotelDescriptiveContentNotif_Inventory_use_rooms",
+            "OTA_HotelDescriptiveContentNotif_Inventory_occupancy_children"
+          ]
+        },
+        {
+          "action": "action_OTA_HotelDescriptiveContentNotif_Info"
+        },
+        {
+          "action": "action_OTA_HotelDescriptiveInfo_Inventory"
+        },
+        {
+          "action": "action_OTA_HotelDescriptiveInfo_Info"
+        },
+        {
+          "action": "action_OTA_HotelRatePlanNotif_RatePlans",
+          "supports": [
+            "OTA_HotelRatePlanNotif_accept_ArrivalDOW",
+            "OTA_HotelRatePlanNotif_accept_DepartureDOW",
+            "OTA_HotelRatePlanNotif_accept_RatePlan_BookingRule",
+            "OTA_HotelRatePlanNotif_accept_RatePlan_RoomType_BookingRule",
+            "OTA_HotelRatePlanNotif_accept_RatePlan_mixed_BookingRule",
+            "OTA_HotelRatePlanNotif_accept_Supplements",
+            "OTA_HotelRatePlanNotif_accept_FreeNightsOffers",
+            "OTA_HotelRatePlanNotif_accept_FamilyOffers",
+            "OTA_HotelRatePlanNotif_accept_overlay",
+            "OTA_HotelRatePlanNotif_accept_RatePlanJoin",
+            "OTA_HotelRatePlanNotif_accept_OfferRule_BookingOffset",
+            "OTA_HotelRatePlanNotif_accept_OfferRule_DOWLOS"
+          ]
+        },
+        {
+          "action": "action_OTA_HotelRatePlan_BaseRates",
+          "supports": [
+            "OTA_HotelRatePlan_BaseRates_deltas"
+          ]
+        }
+      ]
+    }
+  ]
+}

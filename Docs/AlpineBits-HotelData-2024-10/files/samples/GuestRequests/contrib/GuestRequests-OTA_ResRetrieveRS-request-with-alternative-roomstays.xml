@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<OTA_ResRetrieveRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.opentravel.org/OTA/2003/05"
+                   xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_ResRetrieveRS.xsd"
+                   Version="7.000">
+
+    <Success/>
+
+    <ReservationsList>
+
+        <HotelReservation CreateDateTime="2017-09-03T19:47:50" ResStatus="Requested">
+
+            <UniqueID Type="14" ID="6b34fe24ac2ff811"/>
+
+            <RoomStays>
+                <!-- Either DZ and EZ or DZ and SUI is requested -->
+                <RoomStay RoomStayGroupID="1">
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="DZ" RoomClassificationCode="42"/>
+                    </RoomTypes>
+                    <GuestCounts>
+                        <GuestCount Count="2"></GuestCount>
+                    </GuestCounts>
+                    <TimeSpan Start="2017-10-03" End="2017-10-08" />
+                </RoomStay>
+                <RoomStay RoomStayGroupID="1">
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="EZ" RoomClassificationCode="42"/>
+                    </RoomTypes>
+                    <GuestCounts>
+                        <GuestCount Count="1"></GuestCount>
+                    </GuestCounts>
+                    <TimeSpan Start="2017-10-03" End="2017-10-08" />
+                </RoomStay>
+                <RoomStay RoomStayGroupID="2">
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="DZ" RoomClassificationCode="42"/>
+                    </RoomTypes>
+                    <GuestCounts>
+                        <GuestCount Count="2"></GuestCount>
+                    </GuestCounts>
+                    <TimeSpan Start="2017-10-03" End="2017-10-08" />
+                </RoomStay>
+                <RoomStay RoomStayGroupID="2">
+                    <RoomTypes>
+                        <RoomType RoomTypeCode="SUI" RoomClassificationCode="42"/>
+                    </RoomTypes>
+                    <GuestCounts>
+                        <GuestCount Count="1"></GuestCount>
+                    </GuestCounts>
+                    <TimeSpan Start="2017-10-03" End="2017-10-08" />
+                </RoomStay>
+            </RoomStays>
+
+            <ResGuests>
+                <ResGuest>
+                    <Profiles>
+                        <ProfileInfo>
+                            <Profile>
+                                <Customer Language="de" Gender="Unknown">
+                                    <PersonName>
+                                        <GivenName>Otto</GivenName>
+                                        <Surname>Mustermann</Surname>
+                                    </PersonName>
+                                    <Address>
+                                        <CountryName Code="DE"/>
+                                    </Address>
+                                </Customer>
+                            </Profile>
+                        </ProfileInfo>
+                    </Profiles>
+                </ResGuest>
+            </ResGuests>
+
+            <ResGlobalInfo>
+                <HotelReservationIDs>
+                    <HotelReservationID ResID_Type="13" ResID_SourceContext="cnt" ResID_Value="res" ResID_Source="www.example.com"/>
+                </HotelReservationIDs>
+                <BasicPropertyInfo HotelCode="123" HotelName="Frangart Inn"/>
+            </ResGlobalInfo>
+
+        </HotelReservation>
+
+    </ReservationsList>
+
+</OTA_ResRetrieveRS>

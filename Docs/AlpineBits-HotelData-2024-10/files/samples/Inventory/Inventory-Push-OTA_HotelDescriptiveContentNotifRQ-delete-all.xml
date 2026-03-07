@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+    AlpineBits 2022-10
+    https://www.alpinebits.org/
+
+    Sample message file for an Inventory HotelInfo request to push a deletion
+
+    Changelog:
+    v. 2022-10 1.1 reformatting
+    v. 2017-10 1.0 initial example
+-->
+
+<OTA_HotelDescriptiveContentNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05"
+                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="5.000"
+                                    TimeStamp="2014-10-16T17:00:40"
+                                    xsi:schemaLocation="http://www.opentravel.org/OTA/2003/05 OTA_HotelDescriptiveContentNotifRQ.xsd">
+    
+    <HotelDescriptiveContents>
+        
+        <HotelDescriptiveContent HotelCode="9996">
+            
+            <FacilityInfo>
+                <GuestRooms>
+                </GuestRooms>
+            </FacilityInfo>
+            
+        </HotelDescriptiveContent>
+        
+    </HotelDescriptiveContents>
+    
+</OTA_HotelDescriptiveContentNotifRQ>
