@@ -20,6 +20,16 @@ public sealed class AlpineBitsController(
     public async Task<IActionResult> Post(CancellationToken cancellationToken)
     {
         AlpineBitsRQ alpineBitsRQ = new AlpineBitsRQ(Request);
+
+        // map all headers with prefix X- to the output response
+        foreach (var header in Request.Headers.Where(h => h.Key.StartsWith("X-", StringComparison.OrdinalIgnoreCase)))
+        {
+            Response.Headers[header.Key] = header.Value;
+        }
+
+        Response.Headers["X-AlpineBits-Server-Accept-Encoding"] = "gzip";
+        Response.ContentType = "application/xml";
+
         return await alpineBitsRQ.GenerateOutput(cancellationToken);
     }
 
@@ -348,7 +358,7 @@ public sealed class AlpineBitsController(
             return new ContentResult()
             {
                 Content = xmlData,
-                ContentType = "application/xml",
+                ContentType = "text/xml",
                 StatusCode = 200,
             };
         }
