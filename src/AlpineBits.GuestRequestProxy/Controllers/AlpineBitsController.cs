@@ -1,6 +1,7 @@
 using AlpineBits.GuestRequestProxy.Data.Repositories;
 using AlpineBits.GuestRequestProxy.Models;
 using AlpineBits.GuestRequestProxy.Models.AlpineBits;
+using AlpineBits.GuestRequestProxy.Models.AlpineBits.Capabilities;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml;
 using System.Xml.Serialization;
@@ -19,7 +20,7 @@ public sealed class AlpineBitsController(
     [Produces("application/xml")]
     public async Task<IActionResult> Post(CancellationToken cancellationToken)
     {
-        AlpineBitsRQ alpineBitsRQ = new AlpineBitsRQ(Request);
+        AlpineBitsRQ_202410 alpineBitsRQ = new AlpineBitsRQ_202410(Request);
 
         // map all headers with prefix X- to the output response
         foreach (var header in Request.Headers.Where(h => h.Key.StartsWith("X-", StringComparison.OrdinalIgnoreCase)))
@@ -233,16 +234,72 @@ public sealed class AlpineBitsController(
 
     }
 
-    public class AlpineBitsPingHandler : IAlpineBitsActionHandler<OTA_PingRQ, OTA_PingRS>
+    public class AlpineBitsPingHandler202410() : IAlpineBitsActionHandler<OTA_PingRQ, OTA_PingRS>
     {
+        public readonly string Version = "2024-10";
+
+        // capabilities
+        public readonly Models.AlpineBits.Capabilities.Action[] SupportedActions =
+        [
+            new Models.AlpineBits.Capabilities.Action
+            {
+                action = "action_OTA_Ping"
+            },
+            new Models.AlpineBits.Capabilities.Action
+            {
+                action = "action_OTA_Read"
+            }
+        ];
+
+
         public string Action => AlpineBitsActions.OtaPingHandshaking;
 
         public OTA_PingRS Work(OTA_PingRQ data)
         {
+            // extract Echo Data
+            string echoData = data.EchoData;
+            Console.WriteLine(echoData);
+
+            // parse
+            Capabilities capabilities = Capabilities.MapString(echoData);
+
+            // filter current version
+            var version = capabilities.versions.FirstOrDefault(v => v.version == Version);
+            Capabilities myCapabilitites = new();
+            Capabilities filteredEchoData = new() ;
+
+            if (version != null)
+            {
+                // prepare output message
+                filteredEchoData.versions = capabilities.versions.Where(v => v.version == Version).ToArray();
+
+                // generate the new version with supported actions
+                var supportedVersion = version.MatchInput(new Models.AlpineBits.Capabilities.Version() { version = Version, actions = SupportedActions });
+
+                // generate my capabilities based on supported version
+                myCapabilitites.versions = supportedVersion != null ? new[] { supportedVersion } : Array.Empty<Models.AlpineBits.Capabilities.Version>();
+            }
+
+
+            return new OTA_PingRS
+            {
+                TimeStamp = DateTime.Now.ToString(),
+                Version = Version,
+                Items = new object[] { filteredEchoData.ToString(),
+                    new OTA_PingRSWarnings() {
+                    Warning = [new OTA_PingRSWarningsWarning() {
+                        Type = "11",
+                        Status = OTA_PingRSWarningsWarningStatus.ALPINEBITS_HANDSHAKE,
+                        StatusSpecified = true,
+                        Text = [myCapabilitites.ToString()]
+                    }]
+                }}
+            };
+
             return new OTA_PingRS
             {
                 TimeStamp = data.TimeStamp,
-                Items = new object[] { data.EchoData, new object(), 
+                Items = new object[] { data.EchoData, new object(),
                     new OTA_PingRSWarnings() {
                     Warning = [new OTA_PingRSWarningsWarning() {
                         Type = "11",
@@ -288,10 +345,13 @@ public sealed class AlpineBitsController(
         { AlpineBitsActions.OtaPingHandshaking, new(typeof(OTA_PingRQ), typeof(OTA_PingRS)) }
     };
 
-    public class AlpineBitsRQ
+    public class AlpineBitsRQ_202410
     {
 
 
+
+        public const string Version = "2024-10";
+        public const string HeaderAlpineBitsVersion = "-AlpineBits-ClientProtocolVersion";
 
         private HttpRequest httpRequest { get; set; }
 
@@ -299,9 +359,12 @@ public sealed class AlpineBitsController(
         public string request { get; set; }
 
 
+
+
+
         public List<IAlpineBitsActionHandler> Handlers { get; private set; } = new();
 
-        public AlpineBitsRQ(HttpRequest request)
+        public AlpineBitsRQ_202410(HttpRequest request)
         {
             httpRequest = request;
         }
@@ -311,6 +374,8 @@ public sealed class AlpineBitsController(
             if (!httpRequest.HasFormContentType)
                 throw new Exception("request has to be multiform/data");
 
+            // get header version for alpine bits
+
 
             // extract form data to reqeuest and action
             var form = await httpRequest.ReadFormAsync(cancellationToken);
@@ -318,17 +383,17 @@ public sealed class AlpineBitsController(
             var payload = form["request"].ToString();
 
             if (string.IsNullOrEmpty(action))
-                throw new Exception("no value in action");
+                return new BadRequestObjectResult("action is required");
 
             // Handler-Registry initialisieren (sollte in DI verschoben werden)
             var registry = new AlpineBitsHandlerRegistry();
-            registry.Register(new AlpineBitsPingHandler());
+            registry.Register(new AlpineBitsPingHandler202410());
             // registry.Register(new OtherHandler());
 
             var handler = registry.GetHandler(action);
             if (handler == null)
             {
-                throw new Exception($"Unsupported action '{action}'.");
+                return new BadRequestObjectResult("not supported action");
             }
 
 
@@ -343,18 +408,21 @@ public sealed class AlpineBitsController(
             var request = serializer.Deserialize(reader);
 
             // Handler ausführen
-            var response = handler.Process(request!);
+            object response = handler.Process(request!);
+            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(response));
 
             // XML serialisieren
             var responseSerializer = new XmlSerializer(handler.ResponseType);
             using var writer = new StringWriter();
             responseSerializer.Serialize(writer, response);
 
-            
+
             return Xml(writer.ToString());
         }
         private IActionResult Xml(string xmlData)
         {
+            Console.WriteLine(xmlData);
+
             return new ContentResult()
             {
                 Content = xmlData,
@@ -366,7 +434,7 @@ public sealed class AlpineBitsController(
     }
 
 
-    
+
 
 
 
