@@ -34,3 +34,23 @@ public sealed class GuestRequestLogRepository(AlpineBitsDbContext dbContext) : I
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 }
+
+
+public sealed class GuestRequestLogRepositoryFake() : IGuestRequestLogRepository
+{
+    public async Task AddAsync(GuestRequestLog log, CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+
+    public async Task<List<GuestRequestLog>> GetPendingRequestsAsync(int tenantId, CancellationToken cancellationToken)
+    {
+        return await Task.FromResult(new List<GuestRequestLog>());
+    }
+
+    public async Task MarkAsProcessedAsync(List<int> logIds, CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+
+    }
+}

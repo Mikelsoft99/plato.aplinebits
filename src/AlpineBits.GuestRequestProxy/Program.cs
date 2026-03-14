@@ -11,18 +11,18 @@ builder.Services.AddResponseCompression();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpClient<IAsaClient, AsaClient>();
-builder.Services.AddSingleton<IWidgetRequestMapper, WidgetRequestMapper>();
-builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-builder.Services.AddScoped<IGuestRequestLogRepository, GuestRequestLogRepository>();
+//builder.Services.AddHttpClient<IAsaClient, AsaClient>();
+//builder.Services.AddSingleton<IWidgetRequestMapper, WidgetRequestMapper>();
+builder.Services.AddScoped<ITenantRepository, TenantRepositoryFake>();
+builder.Services.AddScoped<IGuestRequestLogRepository, GuestRequestLogRepositoryFake>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AlpineBitsDbContext>();
-    db.Database.EnsureCreated();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<AlpineBitsDbContext>();
+//    db.Database.EnsureCreated();
+//}
 
 app.UseResponseCompression();
 

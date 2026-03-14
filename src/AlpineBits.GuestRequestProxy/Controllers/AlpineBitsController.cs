@@ -3,6 +3,7 @@ using AlpineBits.GuestRequestProxy.Models;
 using AlpineBits.GuestRequestProxy.Models.AlpineBits;
 using AlpineBits.GuestRequestProxy.Models.AlpineBits.Capabilities;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using static AlpineBits.GuestRequestProxy.Controllers.AlpineBitsController;
@@ -13,7 +14,8 @@ namespace AlpineBits.GuestRequestProxy.Controllers;
 [Route("alpinebits")]
 public sealed class AlpineBitsController(
     ITenantRepository tenantRepository,
-    IGuestRequestLogRepository logRepository) : ControllerBase
+    IGuestRequestLogRepository logRepository
+    ) : ControllerBase
 {
     [HttpPost]
     [Consumes("multipart/form-data")]
@@ -31,7 +33,8 @@ public sealed class AlpineBitsController(
         Response.Headers["X-AlpineBits-Server-Accept-Encoding"] = "gzip";
         Response.ContentType = "application/xml";
 
-        return await alpineBitsRQ.GenerateOutput(cancellationToken);
+        var result = await alpineBitsRQ.GenerateOutput(cancellationToken);
+        return result;
     }
 
     private static string BuildPingResponse(string payload)
@@ -258,7 +261,6 @@ public sealed class AlpineBitsController(
         {
             // extract Echo Data
             string echoData = data.EchoData;
-            Console.WriteLine(echoData);
 
             // parse
             Capabilities capabilities = Capabilities.MapString(echoData);
@@ -266,7 +268,7 @@ public sealed class AlpineBitsController(
             // filter current version
             var version = capabilities.versions.FirstOrDefault(v => v.version == Version);
             Capabilities myCapabilitites = new();
-            Capabilities filteredEchoData = new() ;
+            Capabilities filteredEchoData = new();
 
             if (version != null)
             {
@@ -283,9 +285,9 @@ public sealed class AlpineBitsController(
 
             return new OTA_PingRS
             {
-                TimeStamp = DateTime.Now.ToString(),
-                Version = Version,
-                Items = new object[] { filteredEchoData.ToString(),
+                TimeStamp = DateTime.Now.ToString("s"),
+                Version = "3.000",
+                Items = new object[] {
                     new OTA_PingRSWarnings() {
                     Warning = [new OTA_PingRSWarningsWarning() {
                         Type = "11",
@@ -293,7 +295,11 @@ public sealed class AlpineBitsController(
                         StatusSpecified = true,
                         Text = [myCapabilitites.ToString()]
                     }]
-                }}
+                }, 
+                    new object(), 
+                    //filteredEchoData.ToString()
+                    echoData
+                }
             };
 
             return new OTA_PingRS
@@ -347,20 +353,19 @@ public sealed class AlpineBitsController(
 
     public class AlpineBitsRQ_202410
     {
-
-
-
         public const string Version = "2024-10";
-        public const string HeaderAlpineBitsVersion = "-AlpineBits-ClientProtocolVersion";
+        public const string HeaderAlpineBitsVersion = "X-AlpineBits-ClientProtocolVersion";
 
         private HttpRequest httpRequest { get; set; }
 
         public string action { get; set; }
         public string request { get; set; }
 
-
-
-
+        // UTF-8 für XML-Deklaration erzwingen
+        private sealed class Utf8StringWriter : StringWriter
+        {
+            public override Encoding Encoding => new UTF8Encoding(false);
+        }
 
         public List<IAlpineBitsActionHandler> Handlers { get; private set; } = new();
 
@@ -374,59 +379,69 @@ public sealed class AlpineBitsController(
             if (!httpRequest.HasFormContentType)
                 throw new Exception("request has to be multiform/data");
 
-            // get header version for alpine bits
+            string headerVersion = httpRequest.Headers[HeaderAlpineBitsVersion].ToString();
+            if (headerVersion != Version)
+            {
+                Console.WriteLine("exit on wrong AlpineBitsVersion " + headerVersion);
+                return new StatusCodeResult(400);
+            }
 
+            Console.WriteLine("Request with: " + headerVersion);
 
-            // extract form data to reqeuest and action
             var form = await httpRequest.ReadFormAsync(cancellationToken);
             var action = form["action"].ToString();
             var payload = form["request"].ToString();
 
             if (string.IsNullOrEmpty(action))
-                return new BadRequestObjectResult("action is required");
+            {
+                Console.WriteLine("exit on empty action");
+                return new StatusCodeResult(400);
+            }
 
-            // Handler-Registry initialisieren (sollte in DI verschoben werden)
             var registry = new AlpineBitsHandlerRegistry();
             registry.Register(new AlpineBitsPingHandler202410());
-            // registry.Register(new OtherHandler());
 
             var handler = registry.GetHandler(action);
             if (handler == null)
             {
-                return new BadRequestObjectResult("not supported action");
+                Console.WriteLine("exit on not supported action: " + action);
+                return new StatusCodeResult(400);
             }
 
+            Console.WriteLine("Handling action: " + action);
 
-            // detect input type and output type
             AlpineBitsTypes alpineBitsTypes;
             if (!AlpineBitsTypeDic.TryGetValue(action, out alpineBitsTypes))
                 throw new Exception("no handler registered");
 
-            // XML deserialisieren
             var serializer = new XmlSerializer(handler.RequestType);
             using var reader = new StringReader(payload);
             var request = serializer.Deserialize(reader);
 
-            // Handler ausführen
             object response = handler.Process(request!);
-            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(response));
 
-            // XML serialisieren
             var responseSerializer = new XmlSerializer(handler.ResponseType);
-            using var writer = new StringWriter();
-            responseSerializer.Serialize(writer, response);
+            using var writer = new Utf8StringWriter();
+            using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings
+            {
+                Indent = true,
+                Encoding = new UTF8Encoding(false)
+            }))
+            {
+                responseSerializer.Serialize(xmlWriter, response);
+            }
 
-
-            return Xml(writer.ToString());
+            string xmlOutput = writer.ToString();
+            Console.WriteLine(xmlOutput);
+            return Xml(xmlOutput);
         }
+
         private IActionResult Xml(string xmlData)
         {
-            Console.WriteLine(xmlData);
-
             return new ContentResult()
             {
                 Content = xmlData,
-                ContentType = "text/xml",
+                ContentType = "application/xml; charset=utf-8",
                 StatusCode = 200,
             };
         }

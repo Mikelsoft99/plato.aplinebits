@@ -28,3 +28,24 @@ public sealed class TenantRepository(AlpineBitsDbContext dbContext) : ITenantRep
             .FirstOrDefaultAsync(cancellationToken);
     }
 }
+
+
+public sealed class TenantRepositoryFake() : ITenantRepository
+{
+    public async Task<HotelTenant?> GetByApiKeyAsync(string apiKey, CancellationToken cancellationToken)
+    {
+        return await Task.FromResult<HotelTenant?>(null);
+    }
+
+    public async Task<HotelTenant?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
+    {
+        return await Task.FromResult<HotelTenant?>(null);
+
+    }
+
+    public async Task<HotelTenant?> GetFirstActiveTenantAsync(CancellationToken cancellationToken)
+    {
+        return await Task.FromResult<HotelTenant?>(null);
+
+    }
+}
