@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Urlaubsanfrage</title>
+	<!--
+	  Stencil Web Component laden.
+	  Voraussetzung: cd fontend/widget-component && npm install && npm run build
+	-->
+	<script type="module" src="../widget-component/dist/vacation-request/vacation-request.esm.js"></script>
+	<script nomodule src="../widget-component/dist/vacation-request/vacation-request.js"></script>
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			min-height: 100vh;
+		}
+
+		body {
+			background:
+				radial-gradient(1300px 600px at -30% -20%, #ffd7b3 0%, transparent 60%),
+				radial-gradient(800px 500px at 120% 0%, #b9efe8 0%, transparent 68%),
+				#f8f7f4;
+		}
+	</style>
+</head>
+<body>
+	<!--
+	  endpoint  – API-Endpunkt (default: /widget/request)
+	  api-key   – X-Api-Key Header Wert (leer lassen = kein Header)
+	-->
+	<vacation-request
+		endpoint="/widget/request"
+		api-key="">
+	</vacation-request>
+</body>
+</html>
+<!-- HINWEIS: Dieses Markup enthaelt nur noch die Host-Seite.
+     Die gesamte Formular-Logik lebt in:
+       fontend/widget-component/src/components/vacation-request/
+     Build-Befehl: cd fontend/widget-component && npm install && npm run build -->

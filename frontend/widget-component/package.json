@@ -1,0 +1,22 @@
+{
+  "name": "vacation-request-widget",
+  "version": "1.0.0",
+  "description": "Hotel vacation request web component (Stencil)",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
+  "es2015": "dist/esm/index.mjs",
+  "es2017": "dist/esm/index.mjs",
+  "types": "dist/types/index.d.ts",
+  "collection": "dist/collection/collection-manifest.json",
+  "collection:main": "dist/collection/index.js",
+  "unpkg": "dist/vacation-request/vacation-request.esm.js",
+  "scripts": {
+    "build": "stencil build",
+    "start": "stencil build --dev --watch --serve",
+    "generate": "stencil generate"
+  },
+  "dependencies": {
+    "@stencil/core": "^4.23.0"
+  },
+  "license": "MIT"
+}
